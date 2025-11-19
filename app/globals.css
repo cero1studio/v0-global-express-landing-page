@@ -1,0 +1,54 @@
+@import 'tailwindcss';
+
+@theme inline {
+  /* Updated font configuration to use Oswald for headings and Inter for body */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-oswald: 'Oswald', sans-serif;
+  
+  /* Brand Colors for Global Express Recruiting */
+  --color-primary: #004675;
+  --color-primary-dark: #003557;
+  --color-secondary: #015F88;
+  --color-accent: #00FFFF;
+  --color-neutral: #8C8C8C;
+  --color-background: #EFEFEF;
+  
+  /* Semantic Design Tokens */
+  --color-background: #EFEFEF;
+  --color-foreground: #1a1a1a;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #1a1a1a;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1a1a1a;
+  --color-muted: #F5F5F5;
+  --color-muted-foreground: #8C8C8C;
+  --color-border: #E5E5E5;
+  --color-input: #E5E5E5;
+  --color-ring: #004675;
+  
+  /* Updated all radius values to be fully rounded */
+  --radius-sm: 9999px;
+  --radius-md: 9999px;
+  --radius-lg: 9999px;
+  --radius-xl: 9999px;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Added Oswald utility class for headings */
+.font-oswald {
+  font-family: var(--font-oswald);
+}
+
+/* Decorative elements */
+.decorative-line {
+  background: linear-gradient(180deg, var(--color-accent) 0%, transparent 100%);
+}
