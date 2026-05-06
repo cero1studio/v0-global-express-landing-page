@@ -1,0 +1,21 @@
+{
+  "name": "Global Express Recruiting - Tu Camino Legal a Estados Unidos",
+  "short_name": "Global Express",
+  "description": "Seguridad, estabilidad y respaldo legal para su nuevo comienzo en Estados Unidos. Asesoría profesional para visas EB-3, residencia permanente y empleo legal en EE.UU.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#004675",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/faviconger.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity", "education"],
+  "lang": "es",
+  "dir": "ltr"
+}

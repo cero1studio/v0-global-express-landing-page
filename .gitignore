@@ -1,0 +1,5 @@
+node_modules
+
+# Variables locales (Analytics, Ads, etc.)
+.env
+.env*.local

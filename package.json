@@ -1,10 +1,12 @@
 {
-  "name": "my-v0-project",
-  "version": "0.1.0",
+  "name": "global-express-recruiting-landing",
+  "version": "1.0.0",
   "private": true,
+  "author": "CeroUno Digital <https://cerouno.digital>",
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbopack",
     "lint": "eslint .",
     "start": "next start"
   },

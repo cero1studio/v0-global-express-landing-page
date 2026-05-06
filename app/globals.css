@@ -52,3 +52,14 @@ body {
 .decorative-line {
   background: linear-gradient(180deg, var(--color-accent) 0%, transparent 100%);
 }
+
+/* Hero gradient overlay con compatibilidad cross-browser */
+.hero-gradient-overlay {
+  background: linear-gradient(to right, rgba(0, 70, 117, 0.95) 0%, rgba(0, 70, 117, 0.80) 50%, transparent 100%);
+}
+
+/* Gradiente decorativo horizontal con compatibilidad cross-browser */
+.decorative-gradient-horizontal {
+  background: linear-gradient(to right, transparent 0%, var(--color-accent) 50%, transparent 100%);
+  opacity: 0.3;
+}

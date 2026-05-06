@@ -1,30 +1,107 @@
-# Global Express Landing Page
+# Global Express Recruiting - Landing Page
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+Landing page oficial de Global Express Recruiting, especialistas en asesoría migratoria para visas EB-3, residencia permanente y empleo legal en Estados Unidos.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/javiers-projects-29c0f904/v0-global-express-landing-page)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/lhzQ0LeL7Tq)
+## Descripción
 
-## Overview
+Sitio web optimizado para SEO que presenta los servicios de Global Express Recruiting, incluyendo:
+- Asesoría profesional para proceso migratorio legal
+- Patrocinio laboral para visas EB-3
+- Residencia permanente en Estados Unidos
+- Casos de éxito y testimonios
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## Tecnologías
 
-## Deployment
+- **Next.js 16** - Framework React con SSR
+- **TypeScript** - Tipado estático
+- **Tailwind CSS** - Estilos utilitarios
+- **Radix UI** - Componentes accesibles
+- **Next.js Export** - Generación de sitio estático
 
-Your project is live at:
+## Desarrollo
 
-**[https://vercel.com/javiers-projects-29c0f904/v0-global-express-landing-page](https://vercel.com/javiers-projects-29c0f904/v0-global-express-landing-page)**
+Desarrollado por [CeroUno Digital](https://cerouno.digital)
 
-## Build your app
+## Instalación
 
-Continue building your app on:
+```bash
+npm install
+# o
+pnpm install
+```
 
-**[https://v0.app/chat/lhzQ0LeL7Tq](https://v0.app/chat/lhzQ0LeL7Tq)**
+## Desarrollo
 
-## How It Works
+```bash
+npm run dev
+# o
+pnpm dev
+```
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+
+## Build para Producción (Export Estático)
+
+```bash
+npm run build
+```
+
+Esto generará todos los archivos estáticos en la carpeta `out/`.
+
+### ⚠️ Importante: Cómo probar el export estático
+
+**NO abras el archivo HTML directamente desde el sistema de archivos** (`file://`) porque las rutas no funcionarán.
+
+**Usa un servidor local:**
+
+```bash
+# Opción 1: Usar serve (instalar con: npm install -g serve)
+npx serve out
+
+# Opción 2: Usar Python
+cd out
+python -m http.server 8000
+
+# Opción 3: Usar PHP
+cd out
+php -S localhost:8000
+```
+
+Luego abre: `http://localhost:3000` (o el puerto que indique)
+
+### Desplegar
+
+Los archivos en `out/` están listos para desplegar en cualquier hosting estático:
+- Netlify
+- Vercel
+- GitHub Pages
+- AWS S3
+- Cualquier servidor web estático
+
+## Características SEO
+
+- ✅ Metadata completa (Open Graph, Twitter Cards)
+- ✅ Structured Data (Schema.org)
+- ✅ Sitemap dinámico
+- ✅ Robots.txt optimizado
+- ✅ Imágenes optimizadas con lazy loading
+- ✅ Estructura semántica HTML5
+- ✅ PWA ready con manifest.json
+
+## Estructura del Proyecto
+
+```
+├── app/
+│   ├── layout.tsx      # Layout principal con metadata SEO
+│   └── page.tsx        # Página principal
+├── public/
+│   ├── sitemap.xml     # Sitemap estático
+│   └── robots.txt      # Robots.txt estático
+├── components/         # Componentes reutilizables
+├── public/            # Archivos estáticos
+└── lib/               # Utilidades
+```
+
+## Licencia
+
+Privado - Global Express Recruiting

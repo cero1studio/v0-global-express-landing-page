@@ -1,0 +1,553 @@
+module.exports = [
+"[next]/internal/font/google/oswald_5b5910cf.module.css [app-rsc] (css module)", ((__turbopack_context__) => {
+
+__turbopack_context__.v({
+  "className": "oswald_5b5910cf-module__PdFuBa__className",
+  "variable": "oswald_5b5910cf-module__PdFuBa__variable",
+});
+}),
+"[next]/internal/font/google/oswald_5b5910cf.js [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "default",
+    ()=>__TURBOPACK__default__export__
+]);
+var __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$oswald_5b5910cf$2e$module$2e$css__$5b$app$2d$rsc$5d$__$28$css__module$29$__ = __turbopack_context__.i("[next]/internal/font/google/oswald_5b5910cf.module.css [app-rsc] (css module)");
+;
+const fontData = {
+    className: __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$oswald_5b5910cf$2e$module$2e$css__$5b$app$2d$rsc$5d$__$28$css__module$29$__["default"].className,
+    style: {
+        fontFamily: "'Oswald', 'Oswald Fallback'",
+        fontStyle: "normal"
+    }
+};
+if (__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$oswald_5b5910cf$2e$module$2e$css__$5b$app$2d$rsc$5d$__$28$css__module$29$__["default"].variable != null) {
+    fontData.variable = __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$oswald_5b5910cf$2e$module$2e$css__$5b$app$2d$rsc$5d$__$28$css__module$29$__["default"].variable;
+}
+const __TURBOPACK__default__export__ = fontData;
+}),
+"[next]/internal/font/google/inter_f2d81e59.module.css [app-rsc] (css module)", ((__turbopack_context__) => {
+
+__turbopack_context__.v({
+  "className": "inter_f2d81e59-module__dt-NXW__className",
+  "variable": "inter_f2d81e59-module__dt-NXW__variable",
+});
+}),
+"[next]/internal/font/google/inter_f2d81e59.js [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "default",
+    ()=>__TURBOPACK__default__export__
+]);
+var __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$inter_f2d81e59$2e$module$2e$css__$5b$app$2d$rsc$5d$__$28$css__module$29$__ = __turbopack_context__.i("[next]/internal/font/google/inter_f2d81e59.module.css [app-rsc] (css module)");
+;
+const fontData = {
+    className: __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$inter_f2d81e59$2e$module$2e$css__$5b$app$2d$rsc$5d$__$28$css__module$29$__["default"].className,
+    style: {
+        fontFamily: "'Inter', 'Inter Fallback'",
+        fontStyle: "normal"
+    }
+};
+if (__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$inter_f2d81e59$2e$module$2e$css__$5b$app$2d$rsc$5d$__$28$css__module$29$__["default"].variable != null) {
+    fontData.variable = __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$inter_f2d81e59$2e$module$2e$css__$5b$app$2d$rsc$5d$__$28$css__module$29$__["default"].variable;
+}
+const __TURBOPACK__default__export__ = fontData;
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/lib/site-config.ts [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+/**
+ * Configuración fija para export estático (`output: 'export'`).
+ * Edita aquí los IDs; no depende de variables de entorno en el build.
+ */ /** URL canónica del sitio (sin barra final) */ __turbopack_context__.s([
+    "GA_MEASUREMENT_ID",
+    ()=>GA_MEASUREMENT_ID,
+    "GOOGLE_ADS_CONVERSION_SEND_TO",
+    ()=>GOOGLE_ADS_CONVERSION_SEND_TO,
+    "GOOGLE_ADS_ID",
+    ()=>GOOGLE_ADS_ID,
+    "GTM_ID",
+    ()=>GTM_ID,
+    "SITE_URL",
+    ()=>SITE_URL
+]);
+const SITE_URL = 'https://globalexpressrecruiting.com';
+const GA_MEASUREMENT_ID = 'G-42QRG2806R';
+const GTM_ID = '';
+const GOOGLE_ADS_ID = '';
+const GOOGLE_ADS_CONVERSION_SEND_TO = '';
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tags.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "GoogleTags",
+    ()=>GoogleTags
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$script$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/script.js [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$lib$2f$site$2d$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/lib/site-config.ts [app-rsc] (ecmascript)");
+;
+;
+;
+const gtmId = __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$lib$2f$site$2d$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["GTM_ID"].trim() || null;
+const gaId = __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$lib$2f$site$2d$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["GA_MEASUREMENT_ID"].trim() || null;
+const adsSendTo = __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$lib$2f$site$2d$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["GOOGLE_ADS_CONVERSION_SEND_TO"].trim();
+const adsIdExplicit = __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$lib$2f$site$2d$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["GOOGLE_ADS_ID"].trim();
+const adsId = adsIdExplicit || (adsSendTo.includes('/') ? adsSendTo.split('/')[0] : null);
+const gtagLoaderId = !gtmId ? adsId || gaId || null : null;
+function GoogleTags() {
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["Fragment"], {
+        children: [
+            gtmId ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$script$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                        id: "gtm-base",
+                        strategy: "afterInteractive",
+                        children: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${gtmId}');`
+                    }, void 0, false, {
+                        fileName: "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tags.tsx",
+                        lineNumber: 23,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("noscript", {
+                        dangerouslySetInnerHTML: {
+                            __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}" height="0" width="0" style="display:none;visibility:hidden" title="Google Tag Manager"></iframe>`
+                        }
+                    }, void 0, false, {
+                        fileName: "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tags.tsx",
+                        lineNumber: 30,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true) : null,
+            gtmId ? null : gtagLoaderId ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["Fragment"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$script$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                        src: `https://www.googletagmanager.com/gtag/js?id=${gtagLoaderId}`,
+                        strategy: "beforeInteractive"
+                    }, void 0, false, {
+                        fileName: "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tags.tsx",
+                        lineNumber: 40,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$script$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
+                        id: "gtag-config",
+                        strategy: "afterInteractive",
+                        children: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              ${adsId ? `gtag('config', '${adsId}', { allow_enhanced_conversions: true });` : ''}
+              ${gaId ? `gtag('config', '${gaId}', { send_page_view: true, allow_google_signals: true });` : ''}
+            `
+                    }, void 0, false, {
+                        fileName: "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tags.tsx",
+                        lineNumber: 44,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true) : null
+        ]
+    }, void 0, true);
+}
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tag-runtime.tsx [app-rsc] (client reference proxy) <module evaluation>", ((__turbopack_context__) => {
+"use strict";
+
+// This file is generated by next-core EcmascriptClientReferenceModule.
+__turbopack_context__.s([
+    "GoogleTagRuntime",
+    ()=>GoogleTagRuntime
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$server$2d$dom$2d$turbopack$2d$server$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-turbopack-server.js [app-rsc] (ecmascript)");
+;
+const GoogleTagRuntime = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$server$2d$dom$2d$turbopack$2d$server$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerClientReference"])(function() {
+    throw new Error("Attempted to call GoogleTagRuntime() from the server but GoogleTagRuntime is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.");
+}, "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tag-runtime.tsx <module evaluation>", "GoogleTagRuntime");
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tag-runtime.tsx [app-rsc] (client reference proxy)", ((__turbopack_context__) => {
+"use strict";
+
+// This file is generated by next-core EcmascriptClientReferenceModule.
+__turbopack_context__.s([
+    "GoogleTagRuntime",
+    ()=>GoogleTagRuntime
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$server$2d$dom$2d$turbopack$2d$server$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-turbopack-server.js [app-rsc] (ecmascript)");
+;
+const GoogleTagRuntime = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$server$2d$dom$2d$turbopack$2d$server$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["registerClientReference"])(function() {
+    throw new Error("Attempted to call GoogleTagRuntime() from the server but GoogleTagRuntime is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.");
+}, "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tag-runtime.tsx", "GoogleTagRuntime");
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tag-runtime.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$components$2f$google$2d$tag$2d$runtime$2e$tsx__$5b$app$2d$rsc$5d$__$28$client__reference__proxy$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tag-runtime.tsx [app-rsc] (client reference proxy) <module evaluation>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$components$2f$google$2d$tag$2d$runtime$2e$tsx__$5b$app$2d$rsc$5d$__$28$client__reference__proxy$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tag-runtime.tsx [app-rsc] (client reference proxy)");
+;
+__turbopack_context__.n(__TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$components$2f$google$2d$tag$2d$runtime$2e$tsx__$5b$app$2d$rsc$5d$__$28$client__reference__proxy$29$__);
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/app/layout.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "default",
+    ()=>RootLayout,
+    "metadata",
+    ()=>metadata
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$oswald_5b5910cf$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[next]/internal/font/google/oswald_5b5910cf.js [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$inter_f2d81e59$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[next]/internal/font/google/inter_f2d81e59.js [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$components$2f$google$2d$tags$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tags.tsx [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$components$2f$google$2d$tag$2d$runtime$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/components/google-tag-runtime.tsx [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$lib$2f$site$2d$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/lib/site-config.ts [app-rsc] (ecmascript)");
+;
+;
+;
+;
+;
+;
+;
+const siteUrl = __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$lib$2f$site$2d$config$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["SITE_URL"];
+const siteName = 'Global Express Recruiting';
+const defaultTitle = 'Global Express Recruiting - Su Camino Legal a Estados Unidos';
+const defaultDescription = 'Seguridad, estabilidad y respaldo legal para su nuevo comienzo en Estados Unidos. Asesoría profesional para visas EB-3, residencia permanente y empleo legal en EE.UU.';
+const metadata = {
+    metadataBase: new URL(siteUrl),
+    title: {
+        default: defaultTitle,
+        template: `%s | ${siteName}`
+    },
+    description: defaultDescription,
+    keywords: [
+        'visa EB-3',
+        'visa trabajo Estados Unidos',
+        'residencia permanente USA',
+        'green card',
+        'migración legal Estados Unidos',
+        'empleo legal USA',
+        'sponsor laboral',
+        'visa trabajo Colombia',
+        'migración laboral',
+        'trabajar legalmente en Estados Unidos',
+        'proceso migratorio legal',
+        'asesoría migratoria',
+        'Global Express Recruiting',
+        'visa EB3 Colombia',
+        'empleo en Estados Unidos',
+        'reclutamiento internacional',
+        'patrocinio laboral USA'
+    ],
+    authors: [
+        {
+            name: siteName
+        }
+    ],
+    creator: siteName,
+    publisher: siteName,
+    formatDetection: {
+        email: false,
+        address: false,
+        telephone: false
+    },
+    generator: 'Next.js',
+    applicationName: siteName,
+    referrer: 'origin-when-cross-origin',
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1
+        }
+    },
+    openGraph: {
+        type: 'website',
+        locale: 'es_CO',
+        url: siteUrl,
+        siteName: siteName,
+        title: defaultTitle,
+        description: defaultDescription,
+        images: [
+            {
+                url: '/images/design-mode/GlobalExpressRecruiting_Color.png',
+                width: 1200,
+                height: 630,
+                alt: 'Global Express Recruiting - Su Camino Legal a Estados Unidos'
+            }
+        ]
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: defaultTitle,
+        description: defaultDescription,
+        images: [
+            '/images/design-mode/GlobalExpressRecruiting_Color.png'
+        ],
+        creator: '@globalexpressrecruiting'
+    },
+    alternates: {
+        canonical: siteUrl
+    },
+    icons: {
+        icon: [
+            {
+                url: '/faviconger.png',
+                type: 'image/png'
+            }
+        ],
+        apple: '/faviconger.png',
+        shortcut: '/faviconger.png'
+    },
+    manifest: '/manifest.json',
+    category: 'Immigration Services'
+};
+function RootLayout({ children }) {
+    const organizationSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Global Express Recruiting',
+        url: siteUrl,
+        logo: `${siteUrl}/images/design-mode/GlobalExpressRecruiting_Color.png`,
+        description: defaultDescription,
+        address: [
+            {
+                '@type': 'PostalAddress',
+                streetAddress: '7771 Oakland Park Blvd',
+                addressLocality: 'Sunrise',
+                addressRegion: 'FL',
+                postalCode: '33351',
+                addressCountry: 'US',
+                addressType: 'Oficina Estados Unidos'
+            },
+            {
+                '@type': 'PostalAddress',
+                streetAddress: 'Av. Carrera 45 #108-27 Torre 2',
+                addressLocality: 'Bogotá',
+                addressRegion: 'Cundinamarca',
+                postalCode: '110111',
+                addressCountry: 'CO',
+                addressType: 'Oficina Colombia'
+            }
+        ],
+        contactPoint: [
+            {
+                '@type': 'ContactPoint',
+                telephone: '+57 301 8109450',
+                contactType: 'customer service',
+                email: 'coordinacion@globalexpressrecruiting.com.co',
+                areaServed: [
+                    'CO',
+                    'US',
+                    'MX'
+                ],
+                availableLanguage: [
+                    'Spanish',
+                    'English'
+                ]
+            }
+        ],
+        sameAs: [
+            'https://www.facebook.com/globalexpressrecruiting',
+            'https://www.instagram.com/globalexpressrecruiting',
+            'https://www.linkedin.com/company/globalexpressrecruiting'
+        ],
+        areaServed: {
+            '@type': 'Country',
+            name: [
+                'United States',
+                'Colombia',
+                'Mexico'
+            ]
+        },
+        serviceType: 'Immigration Services',
+        knowsAbout: [
+            'Visa EB-3',
+            'Green Card',
+            'Immigration Law',
+            'Employment Sponsorship',
+            'Legal Migration to USA'
+        ]
+    };
+    const localBusinessSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        name: 'Global Express Recruiting',
+        image: `${siteUrl}/images/design-mode/GlobalExpressRecruiting_Color.png`,
+        '@id': siteUrl,
+        url: siteUrl,
+        telephone: '+57 301 8109450',
+        email: 'coordinacion@globalexpressrecruiting.com.co',
+        address: {
+            '@type': 'PostalAddress',
+            streetAddress: '7771 Oakland Park Blvd',
+            addressLocality: 'Sunrise',
+            addressRegion: 'FL',
+            postalCode: '33351',
+            addressCountry: 'US'
+        },
+        geo: {
+            '@type': 'GeoCoordinates',
+            latitude: 26.1770,
+            longitude: -80.2560
+        },
+        openingHoursSpecification: {
+            '@type': 'OpeningHoursSpecification',
+            dayOfWeek: [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday'
+            ],
+            opens: '09:00',
+            closes: '18:00'
+        },
+        priceRange: '$$',
+        servesCuisine: false
+    };
+    const serviceSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Service',
+        serviceType: 'Immigration and Visa Services',
+        provider: {
+            '@type': 'Organization',
+            name: 'Global Express Recruiting'
+        },
+        areaServed: {
+            '@type': 'Country',
+            name: [
+                'United States',
+                'Colombia',
+                'Mexico'
+            ]
+        },
+        description: 'Servicios de asesoría migratoria para visas EB-3, residencia permanente y empleo legal en Estados Unidos',
+        offers: {
+            '@type': 'Offer',
+            description: 'Asesoría profesional para proceso migratorio legal a Estados Unidos',
+            priceCurrency: 'USD',
+            availability: 'https://schema.org/InStock'
+        }
+    };
+    const faqSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+            {
+                '@type': 'Question',
+                name: '¿Cuánto dura el proceso?',
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Los tiempos varían según la categoría del patrocinio y el caso particular; típicamente el proceso puede tardar entre 24 y 36 meses. En la consulta inicial le daremos un estimado según su perfil.'
+                }
+            },
+            {
+                '@type': 'Question',
+                name: '¿Mi familia puede acompañarme?',
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Sí. En las categorías basadas en empleo, la familia nuclear puede incluirse en el proceso (Esposa (o) e hijos menores de 18 años). Le explicaremos opciones según su caso en su asesoría.'
+                }
+            },
+            {
+                '@type': 'Question',
+                name: '¿Necesito nivel de inglés avanzado?',
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Depende del puesto. Muchas posiciones requieren un nivel básico intermedio; otras, técnico-idiomático más alto. Evaluamos su caso para recomendarle estrategias.'
+                }
+            }
+        ]
+    };
+    const ldJson = [
+        organizationSchema,
+        localBusinessSchema,
+        serviceSchema,
+        faqSchema
+    ];
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("html", {
+        lang: "es",
+        className: `${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$oswald_5b5910cf$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].variable} ${__TURBOPACK__imported__module__$5b$next$5d2f$internal$2f$font$2f$google$2f$inter_f2d81e59$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].variable}`,
+        suppressHydrationWarning: true,
+        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("body", {
+            className: `font-sans antialiased`,
+            suppressHydrationWarning: true,
+            children: [
+                ldJson.map((schema, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("script", {
+                        type: "application/ld+json",
+                        dangerouslySetInnerHTML: {
+                            __html: JSON.stringify(schema)
+                        }
+                    }, i, false, {
+                        fileName: "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/app/layout.tsx",
+                        lineNumber: 272,
+                        columnNumber: 11
+                    }, this)),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$components$2f$google$2d$tags$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["GoogleTags"], {}, void 0, false, {
+                    fileName: "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/app/layout.tsx",
+                    lineNumber: 278,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$components$2f$google$2d$tag$2d$runtime$2e$tsx__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["GoogleTagRuntime"], {}, void 0, false, {
+                    fileName: "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/app/layout.tsx",
+                    lineNumber: 279,
+                    columnNumber: 9
+                }, this),
+                children
+            ]
+        }, void 0, true, {
+            fileName: "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/app/layout.tsx",
+            lineNumber: 270,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "[project]/Documents/repos/GER-filial/v0-global-express-landing-page/app/layout.tsx",
+        lineNumber: 269,
+        columnNumber: 5
+    }, this);
+}
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+module.exports = __turbopack_context__.r("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/server/route-modules/app-page/module.compiled.js [app-rsc] (ecmascript)").vendored['react-rsc'].ReactJsxDevRuntime; //# sourceMappingURL=react-jsx-dev-runtime.js.map
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/client/script.js [app-rsc] (client reference proxy) <module evaluation>", ((__turbopack_context__, module, exports) => {
+
+// This file is generated by next-core EcmascriptClientReferenceModule.
+const { createClientModuleProxy } = __turbopack_context__.r("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-turbopack-server.js [app-rsc] (ecmascript)");
+__turbopack_context__.n(createClientModuleProxy("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/client/script.js <module evaluation>"));
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/client/script.js [app-rsc] (client reference proxy)", ((__turbopack_context__, module, exports) => {
+
+// This file is generated by next-core EcmascriptClientReferenceModule.
+const { createClientModuleProxy } = __turbopack_context__.r("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react-server-dom-turbopack-server.js [app-rsc] (ecmascript)");
+__turbopack_context__.n(createClientModuleProxy("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/client/script.js"));
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/client/script.js [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$client$2f$script$2e$js__$5b$app$2d$rsc$5d$__$28$client__reference__proxy$29$__$3c$module__evaluation$3e$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/client/script.js [app-rsc] (client reference proxy) <module evaluation>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$client$2f$script$2e$js__$5b$app$2d$rsc$5d$__$28$client__reference__proxy$29$__ = __turbopack_context__.i("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/client/script.js [app-rsc] (client reference proxy)");
+;
+__turbopack_context__.n(__TURBOPACK__imported__module__$5b$project$5d2f$Documents$2f$repos$2f$GER$2d$filial$2f$v0$2d$global$2d$express$2d$landing$2d$page$2f$node_modules$2f$next$2f$dist$2f$client$2f$script$2e$js__$5b$app$2d$rsc$5d$__$28$client__reference__proxy$29$__);
+}),
+"[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/script.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {
+
+module.exports = __turbopack_context__.r("[project]/Documents/repos/GER-filial/v0-global-express-landing-page/node_modules/next/dist/client/script.js [app-rsc] (ecmascript)");
+}),
+];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__02e1a236._.js.map

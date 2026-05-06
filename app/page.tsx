@@ -1,18 +1,28 @@
 'use client'
 
-import { useState } from 'react'
-import { ChevronDown, Menu, X, ChevronLeft, ChevronRight, Play } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { GE_LEAD_EC_KEY, toPhoneE164 } from '@/lib/google-enhanced-conversions'
+import { ChevronDown, Menu, X, ChevronLeft, ChevronRight, Play, Quote } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 
+// URL del Google Apps Script - Configurada y lista para usar
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHdXW8v9_DZ5uq-Vf-E-w_NnMTFlQVXZYoeZcyoFdaRuj39USCMdboXtuezflP13SPjg/exec'
+
 export default function GlobalExpressRecruitingPage() {
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
   const [currentBanner, setCurrentBanner] = useState(0)
   const [currentMediaSlide, setCurrentMediaSlide] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false)
+  const [countryCode, setCountryCode] = useState('+57')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'error'>('idle')
+  const [submitMessage, setSubmitMessage] = useState('')
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -22,6 +32,20 @@ export default function GlobalExpressRecruitingPage() {
     understandsCost: false,
     acceptsPrivacy: false
   })
+
+  // Prevenir scroll cuando el modal está abierto
+  useEffect(() => {
+    if (isModalOpen || isVideoModalOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    
+    // Cleanup
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isModalOpen, isVideoModalOpen])
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
@@ -33,19 +57,19 @@ export default function GlobalExpressRecruitingPage() {
 
   const heroBanners = [
     {
-      title: "TU CAMINO LEGAL Y SEGURO PARA VIVIR EN ESTADOS UNIDOS",
+      title: "SU CAMINO LEGAL Y SEGURO PARA VIVIR EN ESTADOS UNIDOS",
       subtitle: "Seguridad, estabilidad y respaldo legal para su nuevo comienzo.",
       image: "/happy-family-together-smiling.jpg",
       alt: "Familia tradicional con mascota"
     },
     {
       title: "CONSTRUYAN JUNTOS SU FUTURO EN ESTADOS UNIDOS",
-      subtitle: "Oportunidades profesionales para parejas que buscan crecer en América.",
+      subtitle: "Oportunidades profesionales para parejas que buscan crecer en Estados Unidos.",
       image: "/professional-couple-smiling-together-planning-futu.jpg",
       alt: "Pareja sin hijos"
     },
     {
-      title: "UN MEJOR FUTURO PARA TI Y TU FAMILIA",
+      title: "UN MEJOR FUTURO PARA USTED Y SU FAMILIA",
       subtitle: "Brindamos apoyo integral a padres y madres solteros con hijos.",
       image: "/single-parent-with-child-smiling-hopeful.jpg",
       alt: "Soltero(a) con hijo(a)"
@@ -148,15 +172,15 @@ export default function GlobalExpressRecruitingPage() {
   const faqs = [
     {
       question: '¿Cuánto dura el proceso?',
-      answer: 'Los tiempos varían según la categoría del patrocinio y el caso particular; típicamente el proceso puede tardar entre 24 y 36 meses. En la consulta inicial te daremos un estimado según tu perfil.'
+      answer: 'Los tiempos varían según la categoría del patrocinio y el caso particular; típicamente el proceso puede tardar entre 24 y 36 meses. En la consulta inicial le daremos un estimado según su perfil.'
     },
     {
       question: '¿Mi familia puede acompañarme?',
-      answer: 'Sí. En las categorías basadas en empleo, la familia nuclear puede incluirse en el proceso (Esposa (o) e hijos menores de 18 años). Te explicaremos opciones según tu caso en tu asesoría.'
+      answer: 'Sí. En las categorías basadas en empleo, la familia nuclear puede incluirse en el proceso (Esposa (o) e hijos menores de 18 años). Le explicaremos opciones según su caso en su asesoría.'
     },
     {
       question: '¿Necesito nivel de inglés avanzado?',
-      answer: 'Depende del puesto. Muchas posiciones requieren un nivel básico intermedio; otras, técnico-idiomático más alto. Evaluamos tu caso para recomendarte estrategias.'
+      answer: 'Depende del puesto. Muchas posiciones requieren un nivel básico intermedio; otras, técnico-idiomático más alto. Evaluamos su caso para recomendarle estrategias.'
     }
   ]
 
@@ -176,22 +200,129 @@ export default function GlobalExpressRecruitingPage() {
     setCurrentMediaSlide((prev) => (prev - 1 + mediaTestimonials.length) % mediaTestimonials.length)
   }
 
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Validación básica
+    if (!formData.name.trim()) {
+      setSubmitStatus('error')
+      setSubmitMessage('Por favor ingrese su nombre completo')
+      return
+    }
+    
+    if (!formData.phone.trim()) {
+      setSubmitStatus('error')
+      setSubmitMessage('Por favor ingrese su número de teléfono')
+      return
+    }
+    
+    if (!formData.email.trim() || !formData.email.includes('@')) {
+      setSubmitStatus('error')
+      setSubmitMessage('Por favor ingrese un email válido')
+      return
+    }
+    
+    if (!formData.acceptsPrivacy) {
+      setSubmitStatus('error')
+      setSubmitMessage('Debe aceptar la política de privacidad para continuar')
+      return
+    }
+    
+    setIsSubmitting(true)
+    setSubmitStatus('idle')
+    setSubmitMessage('')
+    
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        countryCode: countryCode,
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+        city: formData.city.trim(),
+        canCover: formData.canCover,
+        understandsCost: formData.understandsCost,
+        acceptsPrivacy: formData.acceptsPrivacy
+      }
+      
+      // Enviar usando fetch con método que funcione mejor con Google Apps Script
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      })
+      
+      // Con no-cors no podemos leer la respuesta, pero esperamos un momento
+      // y asumimos éxito si no hay error
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      const nombreParam = formData.name.trim()
+      const telefonoParam = `${countryCode} ${formData.phone.trim()}`.trim()
+      const graciasQuery = new URLSearchParams()
+      if (nombreParam) graciasQuery.set('nombre', nombreParam)
+      if (formData.phone.trim()) graciasQuery.set('telefono', telefonoParam)
+      const graciasUrl = graciasQuery.toString() ? `/gracias?${graciasQuery.toString()}` : '/gracias'
+
+      try {
+        const phoneE164 = toPhoneE164(countryCode, formData.phone.trim())
+        sessionStorage.setItem(
+          GE_LEAD_EC_KEY,
+          JSON.stringify({
+            email: formData.email.trim(),
+            phoneE164,
+          })
+        )
+      } catch {
+        /* private mode / storage lleno */
+      }
+
+      setIsSubmitting(false)
+      setIsModalOpen(false)
+      setSubmitStatus('idle')
+      setSubmitMessage('')
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        city: '',
+        canCover: '',
+        understandsCost: false,
+        acceptsPrivacy: false
+      })
+      setCountryCode('+57')
+      router.push(graciasUrl)
+      
+    } catch (error) {
+      console.error('Error al enviar formulario:', error)
+      setSubmitStatus('error')
+      setSubmitMessage('Hubo un error al enviar el formulario. Por favor verifique su conexión e intente nuevamente. Si el problema persiste, contacte al administrador.')
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header - optimizado para mobile con mejor espaciado */}
-      <header className="sticky top-0 z-50 bg-white shadow-sm">
+      <header className="sticky top-0 z-50 bg-white shadow-sm" role="banner">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 sm:h-20 items-center justify-between">
             <div className="flex-shrink-0">
               <img 
                 src="/images/design-mode/GlobalExpressRecruiting_Color.png" 
-                alt="Global Express Recruiting" 
+                alt="Global Express Recruiting - Asesoría migratoria legal para visas EB-3 y residencia permanente en Estados Unidos" 
                 className="h-8 sm:h-12 w-auto"
+                width={200}
+                height={60}
+                loading="eager"
+                fetchPriority="high"
               />
             </div>
             
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden md:flex items-center space-x-8" role="navigation" aria-label="Navegación principal">
               <button onClick={() => scrollToSection('proceso')} className="text-gray-700 hover:text-primary transition-colors font-medium">
                 Proceso
               </button>
@@ -218,7 +349,7 @@ export default function GlobalExpressRecruitingPage() {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <nav className="md:hidden pb-4 space-y-2">
+            <nav className="md:hidden pb-4 space-y-2" role="navigation" aria-label="Menú móvil">
               <button onClick={() => scrollToSection('proceso')} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-full">
                 Proceso
               </button>
@@ -281,41 +412,79 @@ export default function GlobalExpressRecruitingPage() {
               <X className="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" />
             </button>
 
-            <h3 className="text-xl sm:text-2xl font-bold text-primary mb-1.5 sm:mb-2 font-oswald pr-8">
-              Busquemos tu sponsor internacional
-            </h3>
-            <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-5 leading-snug">
-              ¡Responde las siguientes preguntas y un consultor te contactará pronto!
-            </p>
+            {submitStatus === 'idle' && (
+              <>
+                <h3 className="text-xl sm:text-2xl font-bold text-primary mb-1.5 sm:mb-2 font-oswald pr-8">
+                  Busquemos su sponsor internacional
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-5 leading-snug">
+                  ¡Responda las siguientes preguntas y un consultor lo contactará pronto!
+                </p>
+              </>
+            )}
 
-            <form className="space-y-2.5 sm:space-y-3">
+            {submitStatus === 'error' && (
+              <div className="mb-4 p-6 bg-red-50 border-2 border-red-200 rounded-2xl text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-lg font-bold text-red-800 mb-2">Error al enviar</p>
+                    <p className="text-sm text-red-700 leading-relaxed">{submitMessage || 'Hubo un problema. Por favor intente nuevamente.'}</p>
+                  </div>
+                  <Button 
+                    onClick={() => {
+                      setSubmitStatus('idle')
+                      setSubmitMessage('')
+                    }}
+                    className="bg-primary hover:bg-primary/90 text-white font-bold text-sm px-6 py-3 rounded-full"
+                  >
+                    Intentar nuevamente
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {submitStatus === 'idle' && (
+              <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
               <Input 
-                placeholder="¿Cómo te llamas (nombre y apellidos)?"
+                placeholder="¿Cómo se llama (nombre y apellidos)?"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 className="w-full rounded-full text-sm h-11 sm:h-12"
+                required
               />
 
               <div className="flex gap-2">
-                <select className="px-3 py-2 border rounded-full bg-white w-[90px] sm:w-28 text-sm h-11 sm:h-12 flex items-center">
+                <select 
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  className="px-3 py-2 border rounded-full bg-white w-[90px] sm:w-28 text-sm h-11 sm:h-12 flex items-center"
+                >
                   <option value="+57">🇨🇴 +57</option>
                   <option value="+1">🇺🇸 +1</option>
                   <option value="+52">🇲🇽 +52</option>
                 </select>
                 <Input 
-                  placeholder="¿Cuál es tu número?"
+                  type="tel"
+                  placeholder="¿Cuál es su número?"
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   className="flex-1 rounded-full text-sm h-11 sm:h-12"
+                  required
                 />
               </div>
 
               <Input 
                 type="email"
-                placeholder="¿Cuál es tu correo electrónico?"
+                placeholder="¿Cuál es su correo electrónico?"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 className="w-full rounded-full text-sm h-11 sm:h-12"
+                required
               />
 
               <Input 
@@ -330,7 +499,7 @@ export default function GlobalExpressRecruitingPage() {
                 value={formData.canCover}
                 onChange={(e) => setFormData({...formData, canCover: e.target.value})}
               >
-                <option value="">¿Puedes cubrir los costos del programa?</option>
+                <option value="">¿Puede cubrir los costos del programa?</option>
                 <option value="si">Sí</option>
                 <option value="no">No</option>
                 <option value="parcialmente">Parcialmente</option>
@@ -357,20 +526,35 @@ export default function GlobalExpressRecruitingPage() {
                     className="rounded-full mt-0.5 flex-shrink-0"
                   />
                   <label htmlFor="privacy-modal" className="text-xs sm:text-sm text-gray-700 leading-snug cursor-pointer">
-                    He leído y aceptado la política de privacidad
+                    He leído y aceptado la <a href="/politicas" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">política de privacidad</a>
                   </label>
                 </div>
               </div>
 
-              <Button size="lg" className="w-full bg-accent text-primary hover:bg-accent/90 font-bold text-sm sm:text-base py-5 sm:py-6 rounded-full mt-4 sm:mt-5">
-                APLICAR AHORA
+              <Button 
+                type="submit"
+                size="lg" 
+                className="w-full bg-accent text-primary hover:bg-accent/90 font-bold text-sm sm:text-base py-5 sm:py-6 rounded-full mt-4 sm:mt-5 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting || !formData.acceptsPrivacy}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    ENVIANDO...
+                  </span>
+                ) : 'APLICAR AHORA'}
               </Button>
             </form>
+            )}
           </div>
         </div>
       )}
 
-      <section id="hero" className="relative overflow-hidden bg-white">
+      <main role="main" className="relative">
+      <section id="hero" className="relative overflow-hidden bg-white" aria-label="Hero - Su camino legal a Estados Unidos">
         <div className="relative h-[600px] sm:h-screen sm:min-h-[600px] sm:max-h-[900px]">
           {heroBanners.map((banner, index) => (
             <div
@@ -382,10 +566,14 @@ export default function GlobalExpressRecruitingPage() {
               <div className="absolute inset-0">
                 <img 
                   src={banner.image || "/placeholder.svg"}
-                  alt={banner.alt}
+                  alt={`${banner.alt} - ${banner.title} - Global Express Recruiting ayuda a familias a migrar legalmente a Estados Unidos`}
                   className="w-full h-full object-cover"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  width={1920}
+                  height={1080}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/80 to-transparent" />
+                <div className="absolute inset-0 hero-gradient-overlay" />
               </div>
 
               <div className="relative h-full flex items-center">
@@ -464,14 +652,12 @@ export default function GlobalExpressRecruitingPage() {
         </div>
       </section>
 
-      <section className="py-12 sm:py-16 lg:py-20 bg-background relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent" />
+      <section className="py-12 sm:py-16 lg:py-20 bg-background relative" aria-labelledby="medios-heading">
+        <div className="absolute top-0 left-0 right-0 h-1 decorative-gradient-horizontal" />
         
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
-          <div className="absolute left-8 top-0 bottom-0 w-1 bg-accent/30 hidden lg:block" />
-          <div className="absolute left-6 top-0 h-full w-1 border-l-2 border-accent/20 hidden lg:block" />
           
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary text-center mb-8 sm:mb-12 font-oswald px-4">
+          <h2 id="medios-heading" className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary text-center mb-8 sm:mb-12 font-oswald px-4">
             Reconocidos por los principales medios
           </h2>
 
@@ -485,16 +671,16 @@ export default function GlobalExpressRecruitingPage() {
                     key={index}
                     href={testimonial.url}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="noopener noreferrer nofollow"
                     className={`bg-white rounded-3xl shadow-lg p-6 sm:p-8 min-h-[320px] sm:min-h-[380px] flex flex-col hover:shadow-xl transition-shadow cursor-pointer ${
                       offset > 0 ? 'hidden sm:flex' : ''
                     } ${offset > 1 ? 'hidden lg:flex' : ''}`}
                   >
                     <div className="mb-3 sm:mb-4">
-                      <img 
-                        src="/images/design-mode/image-3-2-15x12.png" 
-                        alt="Comillas"
-                        className="w-7 h-5 sm:w-9 sm:h-7"
+                      <Quote 
+                        className="w-7 h-7 sm:w-9 sm:h-9 text-primary scale-x-[-1]"
+                        strokeWidth={1.5}
+                        aria-hidden="true"
                       />
                     </div>
                     
@@ -505,8 +691,11 @@ export default function GlobalExpressRecruitingPage() {
                     <div className="pt-3 sm:pt-4 border-t flex items-center justify-center">
                       <img 
                         src={testimonial.logo || "/placeholder.svg"} 
-                        alt="Logo medio"
+                        alt={`Logo del medio de comunicación que ha cubierto Global Express Recruiting - ${testimonial.quote.substring(0, 50)}...`}
                         className="max-h-12 sm:max-h-16 max-w-full object-contain"
+                        width={200}
+                        height={80}
+                        loading="lazy"
                       />
                     </div>
                   </a>
@@ -550,28 +739,28 @@ export default function GlobalExpressRecruitingPage() {
         </div>
       </section>
 
-      <section id="proceso" className="py-12 sm:py-16 lg:py-24 bg-white relative">
+      <section id="proceso" className="py-12 sm:py-16 lg:py-24 bg-white relative" aria-labelledby="proceso-heading">
         <div className="absolute right-0 top-20 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
         
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
-          <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-primary text-center mb-8 sm:mb-12 font-oswald px-4">
+          <h2 id="proceso-heading" className="text-2xl sm:text-3xl lg:text-5xl font-bold text-primary text-center mb-8 sm:mb-12 font-oswald px-4">
             ¿Por qué confiar en Global Express Recruiting?
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div className="bg-white rounded-3xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow border-t-4 border-accent">
+            <article className="bg-white rounded-3xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow border-t-4 border-accent">
               <h3 className="text-lg sm:text-xl font-bold text-primary mb-2 sm:mb-3 font-oswald">
                 Transparencia y ética
               </h3>
               <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 leading-relaxed">
-                Te mostramos requisitos, costos y tiempos desde el primer contacto para que tomes decisiones informadas.
+                Le mostramos requisitos, costos y tiempos desde el primer contacto para que tome decisiones informadas.
               </p>
               <p className="text-primary font-bold text-xs sm:text-sm">
                 Asesoría inicial sin costo
               </p>
-            </div>
+            </article>
 
-            <div className="bg-white rounded-3xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow border-t-4 border-primary">
+            <article className="bg-white rounded-3xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow border-t-4 border-primary">
               <h3 className="text-lg sm:text-xl font-bold text-primary mb-2 sm:mb-3 font-oswald">
                 Sponsor
               </h3>
@@ -581,21 +770,21 @@ export default function GlobalExpressRecruitingPage() {
               <p className="text-primary font-bold text-xs sm:text-sm">
                 Matching con sponsor
               </p>
-            </div>
+            </article>
 
-            <div className="bg-white rounded-3xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow border-t-4 border-accent">
+            <article className="bg-white rounded-3xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow border-t-4 border-accent">
               <h3 className="text-lg sm:text-xl font-bold text-primary mb-2 sm:mb-3 font-oswald">
                 Acompañamiento integral
               </h3>
               <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4 leading-relaxed">
-                Sólidos procesos de reclutamiento y adaptación para ti y tu familia.
+                Sólidos procesos de reclutamiento y adaptación para usted y su familia.
               </p>
               <p className="text-primary font-bold text-xs sm:text-sm">
                 Preparación migratoria
               </p>
-            </div>
+            </article>
 
-            <div className="bg-white rounded-3xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow border-t-4 border-primary">
+            <article className="bg-white rounded-3xl shadow-lg p-5 sm:p-6 hover:shadow-xl transition-shadow border-t-4 border-primary">
               <h3 className="text-lg sm:text-xl font-bold text-primary mb-2 sm:mb-3 font-oswald">
                 Casos de éxito
               </h3>
@@ -605,25 +794,28 @@ export default function GlobalExpressRecruitingPage() {
               <p className="text-primary font-bold text-xs sm:text-sm">
                 Nuevo comienzo en EE. UU.
               </p>
-            </div>
+            </article>
           </div>
         </div>
       </section>
 
-      <section id="testimonios" className="py-12 sm:py-16 lg:py-24 bg-primary text-white relative overflow-hidden">
+      <section id="testimonios" className="py-12 sm:py-16 lg:py-24 bg-primary text-white relative overflow-hidden" aria-labelledby="testimonios-heading">
         <div className="absolute right-0 top-0 w-96 h-96 border-2 border-accent/20 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute left-0 bottom-0 w-64 h-64 border-2 border-accent/20 rounded-full translate-y-1/2 -translate-x-1/2" />
         
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
           <div className="flex justify-center mb-6 sm:mb-8">
             <img 
-              src="/images/design-mode/PNG%20BLANCO.png" 
-              alt="Global Express Recruiting" 
+              src="/images/png-20blanco.png" 
+              alt="Global Express Recruiting - Casos de éxito de familias que migraron legalmente a Estados Unidos" 
               className="h-12 sm:h-16 w-auto opacity-80"
+              width={200}
+              height={80}
+              loading="lazy"
             />
           </div>
 
-          <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 font-oswald text-white px-4">
+          <h2 id="testimonios-heading" className="text-2xl sm:text-3xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 font-oswald text-white px-4">
             Casos de éxito destacados
           </h2>
 
@@ -635,8 +827,11 @@ export default function GlobalExpressRecruitingPage() {
               >
                 <img 
                   src="/images/design-mode/maxresdefault(1).jpg" 
-                  alt="Video testimonio" 
+                  alt="Video testimonio de Mauricio - Caso de éxito de migración legal a Estados Unidos con Global Express Recruiting" 
                   className="w-full h-full object-cover"
+                  width={1280}
+                  height={720}
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -648,7 +843,7 @@ export default function GlobalExpressRecruitingPage() {
               <div className="space-y-3 sm:space-y-4">
                 <p className="text-base sm:text-xl lg:text-2xl leading-relaxed text-white">
                   Mauricio ya inició su camino hacia una vida y un trabajo legal en EE.UU.
-                  Descubre cómo él y su familia lo lograron.
+                  Descubra cómo él y su familia lo lograron.
                 </p>
               </div>
             </div>
@@ -656,45 +851,54 @@ export default function GlobalExpressRecruitingPage() {
         </div>
       </section>
 
-      <section id="preguntas" className="py-12 sm:py-16 lg:py-24 bg-background">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-primary text-center mb-8 sm:mb-12 font-oswald px-4">
+      <section id="preguntas" className="py-12 sm:py-16 lg:py-24 bg-background relative" aria-labelledby="preguntas-heading">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 relative">
+          <h2 id="preguntas-heading" className="text-2xl sm:text-3xl lg:text-5xl font-bold text-primary text-center mb-8 sm:mb-12 font-oswald px-4">
             Preguntas frecuentes
           </h2>
 
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-3 sm:space-y-4" itemScope itemType="https://schema.org/FAQPage">
             {faqs.map((faq, index) => (
-              <div key={index} className="bg-white rounded-3xl shadow-md overflow-hidden">
+              <article key={index} className="bg-white rounded-3xl shadow-md overflow-hidden" itemScope itemType="https://schema.org/Question">
                 <button
                   onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
                   className="w-full flex items-center justify-between p-4 sm:p-6 text-left hover:bg-gray-50 transition-colors"
+                  aria-expanded={openFaqIndex === index}
+                  aria-controls={`faq-answer-${index}`}
                 >
-                  <span className="text-base sm:text-lg font-bold text-primary pr-3 sm:pr-4 font-oswald">
+                  <span className="text-base sm:text-lg font-bold text-primary pr-3 sm:pr-4 font-oswald" itemProp="name">
                     {faq.question}
                   </span>
                   <ChevronDown 
                     className={`h-5 w-5 text-primary flex-shrink-0 transition-transform ${
                       openFaqIndex === index ? 'rotate-180' : ''
                     }`}
+                    aria-hidden="true"
                   />
                 </button>
                 {openFaqIndex === index && (
-                  <div className="px-4 sm:px-6 pb-4 sm:pb-6 text-sm sm:text-base text-gray-600 leading-relaxed">
-                    {faq.answer}
+                  <div 
+                    id={`faq-answer-${index}`}
+                    className="px-4 sm:px-6 pb-4 sm:pb-6 text-sm sm:text-base text-gray-600 leading-relaxed"
+                    itemScope
+                    itemType="https://schema.org/Answer"
+                    itemProp="acceptedAnswer"
+                  >
+                    <span itemProp="text">{faq.answer}</span>
                   </div>
                 )}
-              </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
-      <section className="py-16 lg:py-24 bg-primary relative overflow-hidden">
+      <section className="py-16 lg:py-24 bg-primary relative overflow-hidden" aria-labelledby="cta-heading">
         {/* Decorative curved line accent */}
         <div className="absolute top-0 left-0 w-full h-1 bg-accent" />
         
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 relative">
           <div className="bg-accent p-8 lg:p-12 text-center shadow-2xl">
-            <h2 className="text-3xl lg:text-4xl font-bold text-primary mb-6 font-oswald">
+            <h2 id="cta-heading" className="text-3xl lg:text-4xl font-bold text-primary mb-6 font-oswald">
               Acceda a una reunión virtual
             </h2>
             <p className="text-lg text-primary/90 mb-8 leading-relaxed max-w-2xl mx-auto">
@@ -706,30 +910,37 @@ export default function GlobalExpressRecruitingPage() {
           </div>
         </div>
       </section>
-      <footer className="bg-white py-8 sm:py-12 border-t">
+      </main>
+      <footer className="bg-white py-8 sm:py-12 border-t" role="contentinfo">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
             <div className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
               <img 
                 src="/images/design-mode/a013fe21-a543-4dac-a60e-d377f4fe38fb-e1705677295501-768x307.jpeg" 
-                alt="Oficina Florida"
+                alt="Oficina de Global Express Recruiting en Sunrise, Florida, Estados Unidos - 7771 Oakland Park Blvd"
                 className="w-full h-40 sm:h-48 object-cover"
+                width={768}
+                height={307}
+                loading="lazy"
               />
               <div className="p-4 sm:p-6">
                 <h3 className="text-lg sm:text-xl font-bold text-primary mb-2 font-oswald">Oficina Estados Unidos</h3>
-                <p className="text-sm sm:text-base text-gray-700">7771 Oakland Pqark Blv Sunrise, FL 33351</p>
+                <address className="text-sm sm:text-base text-gray-700 not-italic">7771 Oakland Park Blvd Sunrise, FL 33351</address>
               </div>
             </div>
 
             <div className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
               <img 
                 src="/images/design-mode/admin-ajax.png" 
-                alt="Oficina Bogotá"
+                alt="Oficina de Global Express Recruiting en Bogotá, Colombia - Edificio Paralelo 108"
                 className="w-full h-40 sm:h-48 object-cover"
+                width={768}
+                height={307}
+                loading="lazy"
               />
               <div className="p-4 sm:p-6">
                 <h3 className="text-lg sm:text-xl font-bold text-primary mb-2 font-oswald">Oficina Colombia</h3>
-                <p className="text-sm sm:text-base text-gray-700">Edificio Paralelo 108 Av. Carrera 45 #108-27 Torre 2</p>
+                <address className="text-sm sm:text-base text-gray-700 not-italic">Edificio Paralelo 108 Av. Carrera 45 #108-27 Torre 2</address>
               </div>
             </div>
           </div>
@@ -737,19 +948,32 @@ export default function GlobalExpressRecruitingPage() {
           <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b">
             <img 
               src="/images/design-mode/image-3-1.png"
-              alt="BBB Accredited Business"
+              alt="Global Express Recruiting - Certificación BBB Accredited Business - Negocio acreditado"
               className="h-16 sm:h-20 w-auto"
+              width={120}
+              height={80}
+              loading="lazy"
             />
             <img 
               src="/images/design-mode/image-2-1.png"
-              alt="NTAS No Current Advisories"
+              alt="Global Express Recruiting - Certificación NTAS No Current Advisories - Sin advertencias actuales"
               className="h-16 sm:h-20 w-auto"
+              width={120}
+              height={80}
+              loading="lazy"
             />
           </div>
 
           <div className="text-center space-y-3 sm:space-y-4">
             <p className="text-sm sm:text-base text-gray-600 font-medium">
-              Políticas de privacidad
+              <a 
+                href="/politicas" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                Términos y condiciones - Políticas de privacidad
+              </a>
             </p>
             <div className="space-y-2 text-sm sm:text-base text-gray-600">
               <p className="break-all">
@@ -759,7 +983,7 @@ export default function GlobalExpressRecruitingPage() {
               </p>
               <p>
                 Teléfono: <a href="tel:+573018109450" className="text-primary hover:underline">
-                  +57-301 8109450
+                  +57 301 8109450
                 </a>
               </p>
             </div>
@@ -768,8 +992,11 @@ export default function GlobalExpressRecruitingPage() {
           <div className="mt-6 sm:mt-8 text-center">
             <img 
               src="/images/design-mode/GlobalExpressRecruiting_Color.png" 
-              alt="Global Express Recruiting" 
+              alt="Global Express Recruiting - Logo - Asesoría migratoria legal para visas EB-3 y residencia permanente en Estados Unidos" 
               className="h-8 sm:h-10 w-auto mx-auto opacity-50"
+              width={200}
+              height={60}
+              loading="lazy"
             />
           </div>
         </div>
