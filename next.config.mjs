@@ -18,7 +18,7 @@ const nextConfig = {
   reactStrictMode: true,
   
   // Trailing slash para mejor compatibilidad con servidores estáticos
-  trailingSlash: false,
+  trailingSlash: true,
   
   // Nota: async headers() no está disponible con output: 'export'
   // Los headers deben configurarse en el servidor web (nginx, Apache, etc.)
