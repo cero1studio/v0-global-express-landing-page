@@ -1,15 +1,48 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { GE_LEAD_EC_KEY, toPhoneE164 } from '@/lib/google-enhanced-conversions'
+import { makePowChallenge, solvePoW, POW_DIFFICULTY } from '@/lib/pow'
 import { ChevronDown, Menu, X, ChevronLeft, ChevronRight, Play, Quote } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Drawer } from 'vaul'
 
-// URL del Google Apps Script - Configurada y lista para usar
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHdXW8v9_DZ5uq-Vf-E-w_NnMTFlQVXZYoeZcyoFdaRuj39USCMdboXtuezflP13SPjg/exec'
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+const PHONE_RE = /^[0-9\s\-().]{6,20}$/
+const FORM_COOLDOWN_MS = 60_000
+const FORM_LS_KEY = '__ge_form_last_submit'
+
+const SOCIAL_PROOF_STATS = [
+  { value: '+500', label: 'Familias asesoradas' },
+  { value: '+5',   label: 'Años de experiencia' },
+  { value: '3',    label: 'Países de origen' },
+  { value: '100%', label: 'Proceso 100% legal' },
+] as const
+
+function sanitizeField(value: string): string {
+  // Strip leading formula-injection characters to prevent CSV/Sheets formula attacks
+  return value.replace(/^[=+\-@\t\r]+/, '').slice(0, 500)
+}
+
+function checkRateLimit(): boolean {
+  try {
+    const last = parseInt(localStorage.getItem(FORM_LS_KEY) ?? '0', 10)
+    return Date.now() - last < FORM_COOLDOWN_MS
+  } catch {
+    return false
+  }
+}
+
+function markSubmitted(): void {
+  try {
+    localStorage.setItem(FORM_LS_KEY, String(Date.now()))
+  } catch { /* ignore */ }
+}
 
 export default function GlobalExpressRecruitingPage() {
   const router = useRouter()
@@ -23,6 +56,11 @@ export default function GlobalExpressRecruitingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'error'>('idle')
   const [submitMessage, setSubmitMessage] = useState('')
+  const [powChallenge, setPowChallenge] = useState('')
+  const [powNonce, setPowNonce] = useState<number | null>(null)
+  const [powReady, setPowReady] = useState(false)
+  const [formStep, setFormStep] = useState<1 | 2>(1)
+  const [isMobile, setIsMobile] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -30,7 +68,8 @@ export default function GlobalExpressRecruitingPage() {
     city: '',
     canCover: '',
     understandsCost: false,
-    acceptsPrivacy: false
+    acceptsPrivacy: false,
+    _hp: '',  // honeypot — must stay empty
   })
 
   // Prevenir scroll cuando el modal está abierto
@@ -40,12 +79,36 @@ export default function GlobalExpressRecruitingPage() {
     } else {
       document.body.style.overflow = 'unset'
     }
-    
-    // Cleanup
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
+    return () => { document.body.style.overflow = 'unset' }
   }, [isModalOpen, isVideoModalOpen])
+
+  // Detect mobile viewport for drawer vs modal switch
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check, { passive: true })
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  // Start PoW computation in background when the form modal opens; reset form state
+  useEffect(() => {
+    if (!isModalOpen) return
+    setFormStep(1)
+    setSubmitStatus('idle')
+    setSubmitMessage('')
+    const challenge = makePowChallenge()
+    setPowChallenge(challenge)
+    setPowNonce(null)
+    setPowReady(false)
+    let cancelled = false
+    solvePoW(challenge, POW_DIFFICULTY).then(nonce => {
+      if (!cancelled) {
+        setPowNonce(nonce)
+        setPowReady(true)
+      }
+    })
+    return () => { cancelled = true }
+  }, [isModalOpen])
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
@@ -201,88 +264,132 @@ export default function GlobalExpressRecruitingPage() {
   }
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // Validación básica
-    if (!formData.name.trim()) {
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false)
+    setFormStep(1)
+  }, [])
+
+  const handleStep1Next = () => {
+    const nameClean = sanitizeField(formData.name.trim())
+    const phoneClean = formData.phone.trim().replace(/\D/g, '').slice(0, 15)
+    const emailClean = formData.email.trim().toLowerCase()
+
+    if (!nameClean || nameClean.length < 2) {
       setSubmitStatus('error')
       setSubmitMessage('Por favor ingrese su nombre completo')
       return
     }
-    
-    if (!formData.phone.trim()) {
+    if (!PHONE_RE.test(formData.phone.trim()) || phoneClean.length < 6) {
       setSubmitStatus('error')
-      setSubmitMessage('Por favor ingrese su número de teléfono')
+      setSubmitMessage('Por favor ingrese un número de teléfono válido (solo dígitos)')
       return
     }
-    
-    if (!formData.email.trim() || !formData.email.includes('@')) {
+    if (!EMAIL_RE.test(emailClean)) {
       setSubmitStatus('error')
-      setSubmitMessage('Por favor ingrese un email válido')
+      setSubmitMessage('Por favor ingrese un correo electrónico válido')
       return
     }
-    
+    setSubmitStatus('idle')
+    setSubmitMessage('')
+    setFormStep(2)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Honeypot check — bots fill hidden fields
+    if (formData._hp) return
+
+    // Client-side rate limiting
+    if (!powReady || powNonce === null) {
+      setSubmitStatus('error')
+      setSubmitMessage('Verificación de seguridad en proceso, intente en un momento.')
+      return
+    }
+
+    if (checkRateLimit()) {
+      setSubmitStatus('error')
+      setSubmitMessage('Por favor espere un momento antes de enviar nuevamente.')
+      return
+    }
+
+    const nameClean = sanitizeField(formData.name.trim())
+    const phoneClean = formData.phone.trim().replace(/\D/g, '').slice(0, 15)
+    const emailClean = formData.email.trim().toLowerCase().slice(0, 254)
+    const cityClean = sanitizeField(formData.city.trim())
+
+    if (!nameClean || nameClean.length < 2) {
+      setSubmitStatus('error')
+      setSubmitMessage('Por favor ingrese su nombre completo')
+      return
+    }
+
+    if (!phoneClean || !PHONE_RE.test(formData.phone.trim())) {
+      setSubmitStatus('error')
+      setSubmitMessage('Por favor ingrese un número de teléfono válido (solo dígitos)')
+      return
+    }
+
+    if (!emailClean || !EMAIL_RE.test(emailClean)) {
+      setSubmitStatus('error')
+      setSubmitMessage('Por favor ingrese un correo electrónico válido')
+      return
+    }
+
     if (!formData.acceptsPrivacy) {
       setSubmitStatus('error')
       setSubmitMessage('Debe aceptar la política de privacidad para continuar')
       return
     }
-    
+
     setIsSubmitting(true)
     setSubmitStatus('idle')
     setSubmitMessage('')
-    
+
     try {
       const payload = {
-        name: formData.name.trim(),
-        countryCode: countryCode,
-        phone: formData.phone.trim(),
-        email: formData.email.trim(),
-        city: formData.city.trim(),
-        canCover: formData.canCover,
+        name: nameClean,
+        countryCode: countryCode.replace(/[^+0-9]/g, '').slice(0, 5),
+        phone: phoneClean,
+        email: emailClean,
+        city: cityClean,
+        canCover: ['si', 'no', 'parcialmente', ''].includes(formData.canCover) ? formData.canCover : '',
         understandsCost: formData.understandsCost,
-        acceptsPrivacy: formData.acceptsPrivacy
+        acceptsPrivacy: formData.acceptsPrivacy,
+        _pow: { challenge: powChallenge, nonce: powNonce, difficulty: POW_DIFFICULTY },
       }
-      
-      // Enviar usando fetch con método que funcione mejor con Google Apps Script
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
+
+      await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-      
-      // Con no-cors no podemos leer la respuesta, pero esperamos un momento
-      // y asumimos éxito si no hay error
+
       await new Promise(resolve => setTimeout(resolve, 1500))
 
-      const nombreParam = formData.name.trim()
-      const telefonoParam = `${countryCode} ${formData.phone.trim()}`.trim()
+      markSubmitted()
+
       const graciasQuery = new URLSearchParams()
-      if (nombreParam) graciasQuery.set('nombre', nombreParam)
-      if (formData.phone.trim()) graciasQuery.set('telefono', telefonoParam)
-      const graciasUrl = graciasQuery.toString() ? `/gracias?${graciasQuery.toString()}` : '/gracias'
+      graciasQuery.set('nombre', nameClean)
+      graciasQuery.set('telefono', `${countryCode} ${phoneClean}`.trim())
+      const graciasUrl = `/gracias?${graciasQuery.toString()}`
 
       try {
-        const phoneE164 = toPhoneE164(countryCode, formData.phone.trim())
+        const phoneE164 = toPhoneE164(countryCode, phoneClean)
         sessionStorage.setItem(
           GE_LEAD_EC_KEY,
-          JSON.stringify({
-            email: formData.email.trim(),
-            phoneE164,
-          })
+          JSON.stringify({ email: emailClean, phoneE164 })
         )
       } catch {
         /* private mode / storage lleno */
       }
 
       setIsSubmitting(false)
-      setIsModalOpen(false)
-      setSubmitStatus('idle')
-      setSubmitMessage('')
+      closeModal()
+      setPowChallenge('')
+      setPowNonce(null)
+      setPowReady(false)
       setFormData({
         name: '',
         phone: '',
@@ -290,15 +397,16 @@ export default function GlobalExpressRecruitingPage() {
         city: '',
         canCover: '',
         understandsCost: false,
-        acceptsPrivacy: false
+        acceptsPrivacy: false,
+        _hp: '',
       })
       setCountryCode('+57')
       router.push(graciasUrl)
-      
+
     } catch (error) {
       console.error('Error al enviar formulario:', error)
       setSubmitStatus('error')
-      setSubmitMessage('Hubo un error al enviar el formulario. Por favor verifique su conexión e intente nuevamente. Si el problema persiste, contacte al administrador.')
+      setSubmitMessage('Hubo un error al enviar el formulario. Por favor verifique su conexión e intente nuevamente.')
       setIsSubmitting(false)
     }
   }
@@ -367,15 +475,6 @@ export default function GlobalExpressRecruitingPage() {
         </div>
       </header>
 
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-full p-3 sm:p-4 shadow-2xl transition-all hover:scale-110"
-        aria-label="Contactar por WhatsApp"
-      >
-        <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-        </svg>
-      </button>
 
       {/* Video Modal */}
       {isVideoModalOpen && (
@@ -401,46 +500,56 @@ export default function GlobalExpressRecruitingPage() {
         </div>
       )}
 
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-6 lg:p-8 border-t-4 border-accent max-w-lg w-full max-h-[92vh] overflow-y-auto relative">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-2 right-2 sm:top-4 sm:right-4 p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
-              aria-label="Cerrar"
-            >
-              <X className="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" />
-            </button>
+      {/* ── Contact Form — Vaul Drawer (mobile) / centered modal (desktop) ── */}
+      {(() => {
+        const spinnerSm = (
+          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+        )
+        const spinnerLg = (
+          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+        )
 
-            {submitStatus === 'idle' && (
-              <>
-                <h3 className="text-xl sm:text-2xl font-bold text-primary mb-1.5 sm:mb-2 font-oswald pr-8">
-                  Busquemos su sponsor internacional
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-5 leading-snug">
-                  ¡Responda las siguientes preguntas y un consultor lo contactará pronto!
-                </p>
-              </>
-            )}
+        const formContent = (
+          <div className="px-5 pt-3 pb-6 sm:px-6 sm:pb-8">
+            {/* Progress bar */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-300 ease-out"
+                  style={{ width: formStep === 1 ? '50%' : '100%' }}
+                />
+              </div>
+              <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">Paso {formStep} de 2</span>
+            </div>
 
+            <h2 className="text-xl sm:text-2xl font-bold text-primary mb-1 font-oswald pr-8">
+              {formStep === 1 ? 'Busquemos su sponsor internacional' : 'Un poco más sobre usted'}
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-600 mb-4 leading-snug">
+              {formStep === 1
+                ? '¡Responda las siguientes preguntas y un consultor lo contactará pronto!'
+                : 'Estos datos nos ayudan a encontrar la mejor opción para su caso.'}
+            </p>
+
+            {/* Error panel */}
             {submitStatus === 'error' && (
-              <div className="mb-4 p-6 bg-red-50 border-2 border-red-200 rounded-2xl text-center">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-2xl text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-lg font-bold text-red-800 mb-2">Error al enviar</p>
-                    <p className="text-sm text-red-700 leading-relaxed">{submitMessage || 'Hubo un problema. Por favor intente nuevamente.'}</p>
-                  </div>
-                  <Button 
-                    onClick={() => {
-                      setSubmitStatus('idle')
-                      setSubmitMessage('')
-                    }}
-                    className="bg-primary hover:bg-primary/90 text-white font-bold text-sm px-6 py-3 rounded-full"
+                  <p className="text-sm text-red-700 leading-relaxed">{submitMessage || 'Hubo un problema. Por favor intente nuevamente.'}</p>
+                  <Button
+                    onClick={() => { setSubmitStatus('idle'); setSubmitMessage('') }}
+                    className="bg-primary hover:bg-primary/90 text-white font-bold text-sm px-5 py-2 rounded-full"
                   >
                     Intentar nuevamente
                   </Button>
@@ -448,110 +557,184 @@ export default function GlobalExpressRecruitingPage() {
               </div>
             )}
 
-            {submitStatus === 'idle' && (
-              <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
-              <Input 
-                placeholder="¿Cómo se llama (nombre y apellidos)?"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full rounded-full text-sm h-11 sm:h-12"
-                required
-              />
-
-              <div className="flex gap-2">
-                <select 
-                  value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value)}
-                  className="px-3 py-2 border rounded-full bg-white w-[90px] sm:w-28 text-sm h-11 sm:h-12 flex items-center"
-                >
-                  <option value="+57">🇨🇴 +57</option>
-                  <option value="+1">🇺🇸 +1</option>
-                  <option value="+52">🇲🇽 +52</option>
-                </select>
-                <Input 
-                  type="tel"
-                  placeholder="¿Cuál es su número?"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="flex-1 rounded-full text-sm h-11 sm:h-12"
-                  required
+            {/* Step 1: Contact info */}
+            {formStep === 1 && submitStatus !== 'error' && (
+              <div className="space-y-3">
+                <Input
+                  placeholder="¿Cómo se llama (nombre y apellidos)?"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full rounded-full text-sm h-12"
+                  inputMode="text"
+                  autoComplete="name"
+                  maxLength={100}
+                  autoFocus
                 />
-              </div>
-
-              <Input 
-                type="email"
-                placeholder="¿Cuál es su correo electrónico?"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full rounded-full text-sm h-11 sm:h-12"
-                required
-              />
-
-              <Input 
-                placeholder="¿En qué ciudad vives?"
-                value={formData.city}
-                onChange={(e) => setFormData({...formData, city: e.target.value})}
-                className="w-full rounded-full text-sm h-11 sm:h-12"
-              />
-
-              <select 
-                className="w-full px-3 sm:px-4 py-2 border rounded-full bg-white text-sm h-11 sm:h-12"
-                value={formData.canCover}
-                onChange={(e) => setFormData({...formData, canCover: e.target.value})}
-              >
-                <option value="">¿Puede cubrir los costos del programa?</option>
-                <option value="si">Sí</option>
-                <option value="no">No</option>
-                <option value="parcialmente">Parcialmente</option>
-              </select>
-
-              <div className="space-y-2.5 pt-1">
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="cost-modal"
-                    checked={formData.understandsCost}
-                    onCheckedChange={(checked) => setFormData({...formData, understandsCost: checked as boolean})}
-                    className="rounded-full mt-0.5 flex-shrink-0"
+                <div className="flex gap-2">
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="px-3 py-2 border rounded-full bg-white w-[90px] sm:w-28 text-sm h-12"
+                  >
+                    <option value="+57">🇨🇴 +57</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+52">🇲🇽 +52</option>
+                  </select>
+                  <Input
+                    type="tel"
+                    placeholder="¿Cuál es su número?"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="flex-1 rounded-full text-sm h-12"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    maxLength={20}
                   />
-                  <label htmlFor="cost-modal" className="text-xs sm:text-sm text-gray-700 leading-snug cursor-pointer">
-                    Entiendo que la inversión mínima es de 23.990 Dólares
-                  </label>
                 </div>
-
-                <div className="flex items-start space-x-2">
-                  <Checkbox 
-                    id="privacy-modal"
-                    checked={formData.acceptsPrivacy}
-                    onCheckedChange={(checked) => setFormData({...formData, acceptsPrivacy: checked as boolean})}
-                    className="rounded-full mt-0.5 flex-shrink-0"
-                  />
-                  <label htmlFor="privacy-modal" className="text-xs sm:text-sm text-gray-700 leading-snug cursor-pointer">
-                    He leído y aceptado la <a href="/politicas" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">política de privacidad</a>
-                  </label>
-                </div>
+                <Input
+                  type="email"
+                  placeholder="¿Cuál es su correo electrónico?"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full rounded-full text-sm h-12"
+                  inputMode="email"
+                  autoComplete="email"
+                  maxLength={254}
+                />
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={handleStep1Next}
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-bold text-sm sm:text-base py-5 sm:py-6 rounded-full mt-1"
+                >
+                  Continuar →
+                </Button>
               </div>
+            )}
 
-              <Button 
-                type="submit"
-                size="lg" 
-                className="w-full bg-accent text-primary hover:bg-accent/90 font-bold text-sm sm:text-base py-5 sm:py-6 rounded-full mt-4 sm:mt-5 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isSubmitting || !formData.acceptsPrivacy}
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    ENVIANDO...
-                  </span>
-                ) : 'APLICAR AHORA'}
-              </Button>
-            </form>
+            {/* Step 2: Additional info + submit */}
+            {formStep === 2 && submitStatus !== 'error' && (
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <input
+                  type="text"
+                  name="_hp"
+                  value={formData._hp}
+                  onChange={(e) => setFormData({...formData, _hp: e.target.value})}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  style={{ display: 'none' }}
+                />
+                <Input
+                  placeholder="¿En qué ciudad vives?"
+                  value={formData.city}
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  className="w-full rounded-full text-sm h-12"
+                  inputMode="text"
+                  autoComplete="address-level2"
+                  maxLength={100}
+                />
+                <select
+                  className="w-full px-4 py-2 border rounded-full bg-white text-sm h-12"
+                  value={formData.canCover}
+                  onChange={(e) => setFormData({...formData, canCover: e.target.value})}
+                >
+                  <option value="">¿Puede cubrir los costos del programa?</option>
+                  <option value="si">Sí</option>
+                  <option value="no">No</option>
+                  <option value="parcialmente">Parcialmente</option>
+                </select>
+                <div className="space-y-3 pt-1">
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      id="cost-modal"
+                      checked={formData.understandsCost}
+                      onCheckedChange={(checked) => setFormData({...formData, understandsCost: checked as boolean})}
+                      className="mt-0.5 flex-shrink-0"
+                    />
+                    <label htmlFor="cost-modal" className="text-xs sm:text-sm text-gray-700 leading-snug cursor-pointer">
+                      Entiendo que la inversión mínima es de 25.000 USD
+                    </label>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      id="privacy-modal"
+                      checked={formData.acceptsPrivacy}
+                      onCheckedChange={(checked) => setFormData({...formData, acceptsPrivacy: checked as boolean})}
+                      className="mt-0.5 flex-shrink-0"
+                    />
+                    <label htmlFor="privacy-modal" className="text-xs sm:text-sm text-gray-700 leading-snug cursor-pointer">
+                      He leído y aceptado la{' '}
+                      <a href="/politicas" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                        política de privacidad
+                      </a>
+                    </label>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    onClick={() => { setFormStep(1); setSubmitStatus('idle'); setSubmitMessage('') }}
+                    className="flex-1 rounded-full font-bold text-sm py-5"
+                  >
+                    ← Volver
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="flex-[2] bg-accent text-primary hover:bg-accent/90 font-bold text-sm py-5 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isSubmitting || !formData.acceptsPrivacy || !powReady}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center gap-2">{spinnerLg} ENVIANDO...</span>
+                    ) : !powReady ? (
+                      <span className="flex items-center justify-center gap-2">{spinnerSm} Verificando...</span>
+                    ) : 'APLICAR AHORA'}
+                  </Button>
+                </div>
+              </form>
             )}
           </div>
-        </div>
-      )}
+        )
+
+        if (isMobile) {
+          return (
+            <Drawer.Root open={isModalOpen} onOpenChange={(open) => { if (!open) closeModal() }} repositionInputs>
+              <Drawer.Portal>
+                <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
+                <Drawer.Content
+                  aria-describedby={undefined}
+                  className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl border-t-4 border-accent outline-none"
+                  style={{ maxHeight: '92dvh' }}
+                >
+                  <Drawer.Title className="sr-only">Formulario de contacto</Drawer.Title>
+                  <Drawer.Handle className="mx-auto mt-4 mb-1 h-1.5 w-12 rounded-full bg-gray-200" />
+                  <div className="overflow-y-auto" style={{ maxHeight: 'calc(92dvh - 40px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+                    {formContent}
+                  </div>
+                </Drawer.Content>
+              </Drawer.Portal>
+            </Drawer.Root>
+          )
+        }
+
+        return isModalOpen ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl shadow-2xl border-t-4 border-accent max-w-lg w-full max-h-[92vh] overflow-y-auto relative">
+              <button
+                onClick={closeModal}
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+                aria-label="Cerrar"
+              >
+                <X className="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" />
+              </button>
+              {formContent}
+            </div>
+          </div>
+        ) : null
+      })()}
 
       <main role="main" className="relative">
       <section id="hero" className="relative overflow-hidden bg-white" aria-label="Hero - Su camino legal a Estados Unidos">
@@ -648,6 +831,20 @@ export default function GlobalExpressRecruitingPage() {
             >
               <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6 text-primary" />
             </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Social proof stats strip */}
+      <section className="bg-primary py-7 sm:py-10" aria-label="Estadísticas de confianza">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+            {SOCIAL_PROOF_STATS.map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-accent font-oswald">{stat.value}</div>
+                <div className="text-xs sm:text-sm text-white/80 mt-1 leading-tight">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -981,9 +1178,19 @@ export default function GlobalExpressRecruitingPage() {
                   coordinacion@globalexpressrecruiting.com.co
                 </a>
               </p>
+              <p className="break-all">
+                WhatsApp: <a
+                  href="https://wa.me/573018109450?text=Hola%20Global%20Express%20Recruiting%2C%20quiero%20más%20información"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  +57 318 4122230
+                </a>
+              </p>
               <p>
-                Teléfono: <a href="tel:+573018109450" className="text-primary hover:underline">
-                  +57 301 8109450
+                Teléfono: <a href="tel:+573184122230" className="text-primary hover:underline">
+                  +57 318 4122230
                 </a>
               </p>
             </div>
@@ -1001,6 +1208,32 @@ export default function GlobalExpressRecruitingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Spacer so footer content isn't hidden behind the sticky CTA bar on mobile */}
+      <div className="h-20 md:hidden" aria-hidden="true" />
+
+      {/* Sticky CTA bar — mobile only */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-200 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          className="w-full bg-accent text-primary hover:bg-accent/90 font-bold text-base rounded-full py-5 shadow-md"
+        >
+          APLICAR AHORA 
+        </Button>
+      </div>
+
+      <a
+        href="https://wa.me/573184122230?text=Hola%20Global%20Express%20Recruiting%2C%20quiero%20más%20información"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Contactar por WhatsApp"
+        className="fixed bottom-5 right-5 z-50 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform duration-200 ease-out hover:scale-105 hover:bg-[#1ebe57] focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-slate-900"
+      >
+        <svg viewBox="0 0 24 24" className="h-7 w-7" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.472-.148-.672.15-.198.297-.768.967-.942 1.165-.173.198-.347.223-.644.075-.297-.149-1.255-.462-2.39-1.475-.883-.786-1.48-1.754-1.653-2.051-.173-.297-.019-.458.13-.607.134-.133.297-.347.446-.52.149-.173.198-.297.298-.496.099-.198.05-.372-.025-.52-.075-.149-.672-1.618-.921-2.215-.242-.581-.487-.502-.672-.51l-.573-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347z" />
+          <path d="M12.004 2.003c-5.52 0-9.998 4.478-9.998 9.999 0 1.764.463 3.506 1.342 5.025l-1.41 5.16 5.289-1.387c1.413.771 3.07 1.185 4.777 1.185 5.52 0 9.998-4.478 9.998-9.999s-4.478-9.999-9.998-9.999zm0 18.3c-1.46 0-2.883-.385-4.112-1.114l-.294-.173-3.14.823.84-2.915-.19-.305a7.9 7.9 0 01-1.183-4.184c0-4.365 3.557-7.921 7.92-7.921 4.365 0 7.92 3.556 7.92 7.921s-3.555 7.921-7.92 7.921z" />
+        </svg>
+      </a>
     </div>
   )
 }

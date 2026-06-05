@@ -9,52 +9,113 @@
  * 5. Despliega como Web App (ver instrucciones en GOOGLE_SHEETS_SETUP.md)
  */
 
+/**
+ * Strips leading formula-injection characters (=, +, -, @, tab, CR)
+ * and enforces a max length to prevent CSV/Sheets formula execution.
+ */
+function sanitize(value, maxLen) {
+  if (typeof value !== 'string') return '';
+  return value.replace(/^[=+\-@\t\r]+/, '').slice(0, maxLen || 500);
+}
+
+/** Validates an e-mail address with a simple regex. */
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+/** Validates that canCover is one of the expected enum values. */
+function isValidCanCover(value) {
+  return ['si', 'no', 'parcialmente', ''].indexOf(value) !== -1;
+}
+
+/**
+ * Verifies a Proof-of-Work token.
+ * Rejects challenges older than 10 minutes to prevent replay attacks.
+ * Returns true only if SHA256(`${challenge}:${nonce}`) starts with `difficulty` hex zeros.
+ */
+function verifyPoW(pow) {
+  if (!pow || typeof pow.challenge !== 'string' || typeof pow.nonce !== 'number') return false;
+
+  // Validate challenge format: "{timestamp}-{hex}" and check it's not too old
+  const parts = pow.challenge.split('-');
+  if (parts.length < 2) return false;
+  const ts = parseInt(parts[0], 10);
+  if (isNaN(ts) || Date.now() - ts > 10 * 60 * 1000) return false; // older than 10 min
+
+  const difficulty = typeof pow.difficulty === 'number' ? Math.min(pow.difficulty, 5) : 3;
+  const prefix = '0'.repeat(difficulty);
+  const input = pow.challenge + ':' + pow.nonce;
+  const bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, input, Utilities.Charset.UTF_8);
+  const hex = bytes.map(function(b) { return (b < 0 ? b + 256 : b).toString(16).padStart(2, '0'); }).join('');
+  return hex.startsWith(prefix);
+}
+
+/** Validates a country code: + followed by 1-4 digits. */
+function isValidCountryCode(code) {
+  return /^\+[0-9]{1,4}$/.test(code);
+}
+
 function doPost(e) {
   try {
-    // Verificar que e existe (cuando se ejecuta manualmente, e puede ser undefined)
     if (!e) {
       throw new Error('Este script debe ejecutarse desde el formulario web, no manualmente');
     }
-    
-    // ID de tu Google Sheet (extraído de la URL)
+
     const SHEET_ID = '1wnmjSeId7O-V9Q55RBHKTThL1Tfqx9y5j59KC-gNz7M';
-    
-    // Abrir el sheet
     const sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
-    
-    // Parsear los datos recibidos - manejar diferentes formatos
+
     let data;
     if (e.postData && e.postData.contents) {
       data = JSON.parse(e.postData.contents);
     } else if (e.parameter) {
-      // Si viene como parámetros de formulario
       data = e.parameter;
     } else {
       throw new Error('No se recibieron datos en el formato esperado');
     }
-    
-    // Log para debugging (ver en Ejecuciones del script)
-    console.log('Datos recibidos:', JSON.stringify(data));
-    
-    // Obtener la fecha y hora actual
+
+    // Honeypot: if _hp is present and non-empty, silently discard
+    if (data._hp) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Proof-of-Work verification
+    const pow = typeof data._pow === 'object' ? data._pow : null;
+    if (!verifyPoW(pow)) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: false, error: 'PoW inválido' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Field-level validation
+    const name = sanitize(String(data.name || ''), 100);
+    const phone = String(data.phone || '').replace(/\D/g, '').slice(0, 15);
+    const rawCC = String(data.countryCode || '+57');
+    const countryCode = isValidCountryCode(rawCC) ? rawCC : '+57';
+    const email = String(data.email || '').trim().toLowerCase().slice(0, 254);
+    const city = sanitize(String(data.city || ''), 100);
+    const canCoverRaw = String(data.canCover || '');
+    const canCover = isValidCanCover(canCoverRaw) ? canCoverRaw : '';
+
+    if (!name || name.length < 2) throw new Error('Nombre inválido');
+    if (!phone || phone.length < 6) throw new Error('Teléfono inválido');
+    if (!isValidEmail(email)) throw new Error('Email inválido');
+
     const timestamp = new Date();
-    
-    // Combinar código de país + teléfono en un solo campo (sin espacio)
-    const phoneWithCountryCode = (data.countryCode || '') + (data.phone || '');
-    
-    // Preparar los datos para la fila (según las columnas de tu sheet)
+    const phoneWithCountryCode = countryCode + phone;
+
     const rowData = [
-      timestamp,                                    // Columna A: Fecha y Hora
-      data.name || '',                              // Columna B: Nombre
-      phoneWithCountryCode.trim(),                 // Columna C: Código País + Teléfono (combinado)
-      data.email || '',                             // Columna D: Email
-      data.city || '',                              // Columna E: Ciudad
-      data.canCover || '',                          // Columna F: ¿Puede cubrir costos?
-      data.understandsCost === true || data.understandsCost === 'true' ? 'Sí' : 'No',  // Columna G: Entiende costos
-      data.acceptsPrivacy === true || data.acceptsPrivacy === 'true' ? 'Sí' : 'No'     // Columna H: Acepta privacidad
+      timestamp,
+      name,
+      phoneWithCountryCode,
+      email,
+      city,
+      canCover,
+      data.understandsCost === true || data.understandsCost === 'true' ? 'Sí' : 'No',
+      data.acceptsPrivacy === true || data.acceptsPrivacy === 'true' ? 'Sí' : 'No'
     ];
-    
-    // Agregar la fila al sheet
+
     sheet.appendRow(rowData);
     
     // Log de éxito

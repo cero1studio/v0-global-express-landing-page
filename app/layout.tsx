@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Oswald, Inter } from 'next/font/google'
 import { GoogleTags } from '@/components/google-tags'
 import { GoogleTagRuntime } from '@/components/google-tag-runtime'
@@ -23,6 +23,12 @@ const siteUrl = SITE_URL
 const siteName = 'Global Express Recruiting';
 const defaultTitle = 'Global Express Recruiting - Su Camino Legal a Estados Unidos';
 const defaultDescription = 'Seguridad, estabilidad y respaldo legal para su nuevo comienzo en Estados Unidos. Asesoría profesional para visas EB-3, residencia permanente y empleo legal en EE.UU.';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -142,7 +148,7 @@ export default function RootLayout({
     contactPoint: [
       {
         '@type': 'ContactPoint',
-        telephone: '+57 301 8109450',
+        telephone: '+57 318 4122230',
         contactType: 'customer service',
         email: 'coordinacion@globalexpressrecruiting.com.co',
         areaServed: ['CO', 'US', 'MX'],
@@ -175,7 +181,7 @@ export default function RootLayout({
     image: `${siteUrl}/images/design-mode/GlobalExpressRecruiting_Color.png`,
     '@id': siteUrl,
     url: siteUrl,
-    telephone: '+57 301 8109450',
+    telephone: '+57 318 4122230',
     email: 'coordinacion@globalexpressrecruiting.com.co',
     address: {
       '@type': 'PostalAddress',

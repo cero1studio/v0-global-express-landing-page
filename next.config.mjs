@@ -5,7 +5,7 @@ const nextConfig = {
   output: 'export',        // 👈 clave para que genere HTML estático
   
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   
   images: {
