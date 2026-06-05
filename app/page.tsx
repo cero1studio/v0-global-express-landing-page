@@ -61,6 +61,8 @@ export default function GlobalExpressRecruitingPage() {
   const [powReady, setPowReady] = useState(false)
   const [formStep, setFormStep] = useState<1 | 2>(1)
   const [isMobile, setIsMobile] = useState(false)
+  const [heroVisible, setHeroVisible] = useState(true)
+  const heroRef = useRef<HTMLElement>(null)
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -88,6 +90,18 @@ export default function GlobalExpressRecruitingPage() {
     check()
     window.addEventListener('resize', check, { passive: true })
     return () => window.removeEventListener('resize', check)
+  }, [])
+
+  // Hide sticky CTA bar while hero section is in view (avoid 3 competing CTAs)
+  useEffect(() => {
+    const el = heroRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => setHeroVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
   }, [])
 
   // Start PoW computation in background when the form modal opens; reset form state
@@ -737,7 +751,7 @@ export default function GlobalExpressRecruitingPage() {
       })()}
 
       <main role="main" className="relative">
-      <section id="hero" className="relative overflow-hidden bg-white" aria-label="Hero - Su camino legal a Estados Unidos">
+      <section id="hero" ref={heroRef} className="relative overflow-hidden bg-white" aria-label="Hero - Su camino legal a Estados Unidos">
         <div className="relative h-[600px] sm:h-screen sm:min-h-[600px] sm:max-h-[900px]">
           {heroBanners.map((banner, index) => (
             <div
@@ -1210,24 +1224,26 @@ export default function GlobalExpressRecruitingPage() {
       </footer>
 
       {/* Spacer so footer content isn't hidden behind the sticky CTA bar on mobile */}
-      <div className="h-20 md:hidden" aria-hidden="true" />
+      {!heroVisible && <div className="h-20 md:hidden" aria-hidden="true" />}
 
-      {/* Sticky CTA bar — mobile only */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-200 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <Button
-          onClick={() => setIsModalOpen(true)}
-          className="w-full bg-accent text-primary hover:bg-accent/90 font-bold text-base rounded-full py-5 shadow-md"
-        >
-          APLICAR AHORA 
-        </Button>
-      </div>
+      {/* Sticky CTA bar — mobile only, hidden while hero is in view */}
+      {!heroVisible && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-200 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            className="w-full bg-accent text-primary hover:bg-accent/90 font-bold text-base rounded-full py-5 shadow-md"
+          >
+            APLICAR AHORA
+          </Button>
+        </div>
+      )}
 
       <a
         href="https://wa.me/573184122230?text=Hola%20Global%20Express%20Recruiting%2C%20quiero%20más%20información"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Contactar por WhatsApp"
-        className="fixed bottom-5 right-5 z-50 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform duration-200 ease-out hover:scale-105 hover:bg-[#1ebe57] focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-slate-900"
+        className={`fixed right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-300 ease-out hover:scale-105 hover:bg-[#1ebe57] focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-slate-900 ${!heroVisible ? 'bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:bottom-5' : 'bottom-5'}`}
       >
         <svg viewBox="0 0 24 24" className="h-7 w-7" fill="currentColor" aria-hidden="true">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.472-.148-.672.15-.198.297-.768.967-.942 1.165-.173.198-.347.223-.644.075-.297-.149-1.255-.462-2.39-1.475-.883-.786-1.48-1.754-1.653-2.051-.173-.297-.019-.458.13-.607.134-.133.297-.347.446-.52.149-.173.198-.297.298-.496.099-.198.05-.372-.025-.52-.075-.149-.672-1.618-.921-2.215-.242-.581-.487-.502-.672-.51l-.573-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347z" />
