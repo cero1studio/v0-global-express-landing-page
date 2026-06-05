@@ -63,6 +63,7 @@ export default function GlobalExpressRecruitingPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [heroVisible, setHeroVisible] = useState(true)
   const heroRef = useRef<HTMLElement>(null)
+  const [visualVH, setVisualVH] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -90,6 +91,16 @@ export default function GlobalExpressRecruitingPage() {
     check()
     window.addEventListener('resize', check, { passive: true })
     return () => window.removeEventListener('resize', check)
+  }, [])
+
+  // Track visual viewport height so the drawer shrinks when the keyboard opens (Android)
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const handler = () => setVisualVH(vv.height)
+    handler()
+    vv.addEventListener('resize', handler)
+    return () => vv.removeEventListener('resize', handler)
   }, [])
 
   // Hide sticky CTA bar while hero section is in view (avoid 3 competing CTAs)
@@ -714,18 +725,20 @@ export default function GlobalExpressRecruitingPage() {
         )
 
         if (isMobile) {
+          const drawerMaxH = visualVH ? `${Math.floor(visualVH * 0.97)}px` : '92dvh'
+          const scrollMaxH = visualVH ? `${Math.floor(visualVH * 0.97) - 40}px` : 'calc(92dvh - 40px)'
           return (
-            <Drawer.Root open={isModalOpen} onOpenChange={(open) => { if (!open) closeModal() }} repositionInputs>
+            <Drawer.Root open={isModalOpen} onOpenChange={(open) => { if (!open) closeModal() }}>
               <Drawer.Portal>
                 <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
                 <Drawer.Content
                   aria-describedby={undefined}
                   className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl border-t-4 border-accent outline-none"
-                  style={{ maxHeight: '92dvh' }}
+                  style={{ maxHeight: drawerMaxH }}
                 >
                   <Drawer.Title className="sr-only">Formulario de contacto</Drawer.Title>
                   <Drawer.Handle className="mx-auto mt-4 mb-1 h-1.5 w-12 rounded-full bg-gray-200" />
-                  <div className="overflow-y-auto" style={{ maxHeight: 'calc(92dvh - 40px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+                  <div className="overflow-y-auto" style={{ maxHeight: scrollMaxH, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
                     {formContent}
                   </div>
                 </Drawer.Content>
