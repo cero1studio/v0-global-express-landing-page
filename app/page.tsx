@@ -63,7 +63,6 @@ export default function GlobalExpressRecruitingPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [heroVisible, setHeroVisible] = useState(true)
   const heroRef = useRef<HTMLElement>(null)
-  const [visualVH, setVisualVH] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -93,14 +92,21 @@ export default function GlobalExpressRecruitingPage() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  // Track visual viewport height so the drawer shrinks when the keyboard opens (Android)
+  // Sync --visual-vh CSS var to visualViewport so the drawer reacts instantly
+  // (CSS variable update bypasses React render cycle — no blank-space flash)
   useEffect(() => {
-    const vv = window.visualViewport
-    if (!vv) return
-    const handler = () => setVisualVH(vv.height)
-    handler()
-    vv.addEventListener('resize', handler)
-    return () => vv.removeEventListener('resize', handler)
+    const root = document.documentElement
+    const update = () => {
+      const h = window.visualViewport?.height ?? window.innerHeight
+      root.style.setProperty('--visual-vh', `${h}px`)
+    }
+    update()
+    window.visualViewport?.addEventListener('resize', update)
+    window.addEventListener('resize', update, { passive: true })
+    return () => {
+      window.visualViewport?.removeEventListener('resize', update)
+      window.removeEventListener('resize', update)
+    }
   }, [])
 
   // Hide sticky CTA bar while hero section is in view (avoid 3 competing CTAs)
@@ -725,20 +731,23 @@ export default function GlobalExpressRecruitingPage() {
         )
 
         if (isMobile) {
-          const drawerMaxH = visualVH ? `${Math.floor(visualVH * 0.97)}px` : '92dvh'
-          const scrollMaxH = visualVH ? `${Math.floor(visualVH * 0.97) - 40}px` : 'calc(92dvh - 40px)'
           return (
             <Drawer.Root open={isModalOpen} onOpenChange={(open) => { if (!open) closeModal() }}>
               <Drawer.Portal>
                 <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
                 <Drawer.Content
                   aria-describedby={undefined}
-                  className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl border-t-4 border-accent outline-none"
-                  style={{ maxHeight: drawerMaxH }}
+                  className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl border-t-4 border-accent outline-none flex flex-col"
+                  style={{ maxHeight: 'var(--visual-vh, 92dvh)' }}
                 >
                   <Drawer.Title className="sr-only">Formulario de contacto</Drawer.Title>
-                  <Drawer.Handle className="mx-auto mt-4 mb-1 h-1.5 w-12 rounded-full bg-gray-200" />
-                  <div className="overflow-y-auto" style={{ maxHeight: scrollMaxH, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+                  {/* Handle — no crece ni encoge */}
+                  <Drawer.Handle className="mx-auto mt-3 mb-1 h-1.5 w-12 rounded-full bg-gray-200 flex-shrink-0" />
+                  {/* Área scrollable — ocupa todo el espacio restante, min-h-0 es clave */}
+                  <div
+                    className="flex-1 overflow-y-auto min-h-0"
+                    style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}
+                  >
                     {formContent}
                   </div>
                 </Drawer.Content>
