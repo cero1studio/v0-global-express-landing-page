@@ -28,6 +28,10 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  // Tells Android Chrome to shrink the layout viewport when the keyboard opens.
+  // Without this, position:fixed elements (like the drawer) stay anchored to the
+  // full-screen layout viewport even though the keyboard covers the bottom half.
+  interactiveWidget: 'resizes-content',
 }
 
 export const metadata: Metadata = {

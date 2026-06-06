@@ -92,11 +92,14 @@ export default function GlobalExpressRecruitingPage() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  // Sync --visual-vh CSS var to visualViewport so the drawer reacts instantly
-  // (CSS variable update bypasses React render cycle — no blank-space flash)
+  // Sync --visual-vh CSS var so the drawer maxHeight always matches the
+  // real visible area. With interactive-widget=resizes-content (layout.tsx),
+  // window.innerHeight already shrinks when the keyboard opens on Android,
+  // so we listen to both resize events to cover all browsers.
   useEffect(() => {
     const root = document.documentElement
     const update = () => {
+      // Prefer visualViewport (handles pan-mode browsers); fall back to innerHeight
       const h = window.visualViewport?.height ?? window.innerHeight
       root.style.setProperty('--visual-vh', `${h}px`)
     }
